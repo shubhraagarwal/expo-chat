@@ -27,6 +27,7 @@ import {
   Heading,
 } from "native-base";
 import HeaderModal from "../components/HeaderModal";
+import { storage } from "../mmkvStorage";
 
 const ChatList = () => {
   const [isOpen, setOpen] = useState(false);
@@ -57,9 +58,11 @@ const ChatList = () => {
         }
       }
       setChats(uniqueChats);
+      storage.set("chatList", JSON.stringify(uniqueChats));
       console.log(uniqueChats, "uniqueChats");
     } catch (e) {
-      console.log(e);
+      const chatlist = storage.getString("chatList");
+      setChats(JSON.parse(chatlist));
     }
   };
 
