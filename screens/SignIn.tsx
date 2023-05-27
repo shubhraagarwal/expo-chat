@@ -1,4 +1,4 @@
-import { View, Text, Pressable, TextInput } from "react-native";
+import { View, Pressable, TextInput } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
   createUserWithEmailAndPassword,
@@ -10,6 +10,8 @@ import { auth } from "../hooks/useAuth";
 import { SignInWithEmail } from "../types";
 import { db } from "../firebaseConfig";
 import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Box, Input, Stack, Text } from "native-base";
 
 const SignIn = () => {
   const provider = new GoogleAuthProvider();
@@ -81,34 +83,84 @@ const SignIn = () => {
         // ...
       });
   };
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1, backgroundColor: "red" }}>
-      <TextInput
-        value={credentials.email}
-        onChangeText={(e) => setCredentials({ ...credentials, email: e })}
-        style={{ borderWidth: 1, borderColor: "black" }}
-      />
-      <TextInput
-        value={credentials.password}
-        onChangeText={(e) => setCredentials({ ...credentials, password: e })}
-        style={{ borderWidth: 1, borderColor: "black" }}
-      />
-      <Pressable
-        onPress={() =>
-          signInWithEmail({
-            email: credentials.email,
-            password: credentials.password,
-          })
-        }
+    <Box
+      backgroundColor={"primary"}
+      style={{
+        flex: 1,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+      }}
+      paddingX={11}
+      justifyContent={"center"}
+    >
+      <Stack
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 5, height: 5 },
+          shadowOpacity: 0.6,
+          shadowRadius: 2,
+        }}
+        padding={5}
+        background={"white"}
+        borderRadius={10}
+        space={5}
       >
-        <Text style={{ color: "black" }}>Sign sIn</Text>
-      </Pressable>
-
-      <Pressable onPress={signInWithGoogle}>
-        <Text>Google signin</Text>
-      </Pressable>
-    </View>
+        <Input
+          value={credentials.email}
+          onChangeText={(e) => setCredentials({ ...credentials, email: e })}
+          placeholder="Please input your email"
+          backgroundColor={"white"}
+          size={"xl"}
+          borderRadius={10}
+          borderColor={"black"}
+          placeholderTextColor={"gray.500"}
+        />
+        <Input
+          value={credentials.password}
+          onChangeText={(e) => setCredentials({ ...credentials, password: e })}
+          placeholder="Please input your password"
+          backgroundColor={"white"}
+          size={"xl"}
+          type="password"
+          borderRadius={10}
+          borderColor={"black"}
+          placeholderTextColor={"gray.500"}
+        />
+        <Pressable
+          onPress={() =>
+            signInWithEmail({
+              email: credentials.email,
+              password: credentials.password,
+            })
+          }
+        >
+          <Box
+            borderWidth={1}
+            borderColor={"black"}
+            borderRadius={10}
+            backgroundColor="#99E1FE"
+            padding={5}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 1,
+              shadowRadius: 2,
+            }}
+          >
+            <Text
+              alignSelf={"center"}
+              fontWeight={600}
+              style={{ color: "black" }}
+            >
+              Let me in
+            </Text>
+          </Box>
+        </Pressable>
+      </Stack>
+    </Box>
   );
 };
 

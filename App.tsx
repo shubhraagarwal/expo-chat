@@ -1,18 +1,21 @@
-import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
-import SignIn from "./screens/SignIn";
 import RootNav from "./navigation/RootNav";
 import "./firebaseConfig";
+import { NativeBaseProvider, extendTheme } from "native-base";
+
 export default function App() {
+  const theme = extendTheme({
+    colors: {
+      primary: "#91C8FF",
+
+      secondary: "#EBFEAF",
+      positive: "#62D8B2",
+      negative: "#F98070",
+    },
+  });
+
   return (
-    <View style={styles.container}>
+    <NativeBaseProvider theme={theme}>
       <RootNav />
-    </View>
+    </NativeBaseProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

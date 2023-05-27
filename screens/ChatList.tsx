@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { ListRenderItemInfo, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../hooks/useAuth";
@@ -14,19 +14,25 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  Box,
+  HStack,
+  ThreeDotsIcon,
+  Text,
+  Center,
+  View,
+  Stack,
+  FlatList,
+  Heading,
+} from "native-base";
+import HeaderModal from "../components/HeaderModal";
 
 const ChatList = () => {
-  const [users, setUsers] = useState([]);
+  const [isOpen, setOpen] = useState(false);
+  const [chats, setChats] = useState<any>();
   const navigation = useNavigation();
 
-  const fetchUsers = async () => {
-    const docSnap = await getDocs(collection(db, "users"));
-    docSnap.forEach((doc) => {
-      if (doc.data().email !== auth.currentUser?.email) {
-        setUsers((users) => [...users, doc.data().email]);
-      }
-    });
-  };
   const fetchChatList = async () => {
     try {
       const q = query(
@@ -50,6 +56,7 @@ const ChatList = () => {
           uniqueChats.push(chat);
         }
       }
+      setChats(uniqueChats);
       console.log(uniqueChats, "uniqueChats");
     } catch (e) {
       console.log(e);
@@ -59,33 +66,63 @@ const ChatList = () => {
   useEffect(() => {
     fetchChatList();
   }, []);
+
+  const insets = useSafeAreaInsets();
   return (
-    <View>
-      <Text>Chat scList</Text>
-
-      <Pressable onPress={() => signOut(auth)}>
-        <Text>Sign out</Text>
-      </Pressable>
-
-      <View>
-        <Pressable onPress={() => fetchUsers()}>
-          <Text>New Conversation</Text>
-        </Pressable>
-        {users?.map((user, index) => (
-          <View key={index}>
-            <Pressable onPress={() => navigation.navigate("Chat", { user })}>
-              <Text>{user}</Text>
+    <View
+      style={{
+        flex: 1,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+      }}
+      backgroundColor={"primary"}
+    >
+      <HStack
+        backgroundColor={"secondary"}
+        padding={5}
+        borderBottomRadius={10}
+        justifyContent={"space-between"}
+      >
+        <Center>
+          <Text fontWeight={600} fontSize={"xl"}>
+            {auth.currentUser?.email}
+          </Text>
+        </Center>
+        <Center>
+          <Pressable onPress={() => setOpen(true)}>
+            <ThreeDotsIcon />
+          </Pressable>
+        </Center>
+      </HStack>
+      <FlatList
+        data={chats}
+        renderItem={({ item }: any) => {
+          const date = new Date(item.timestamp).toLocaleString();
+          return (
+            <Pressable
+              onPress={() =>
+                navigation.navigate("Chat", { user: item.chatWith })
+              }
+            >
+              <HStack
+                borderBottomColor={"black"}
+                borderBottomWidth={1}
+                justifyContent={"space-between"}
+              >
+                <Stack>
+                  <Heading>{item.chatWith}</Heading>
+                  <Text>{item.text}</Text>
+                </Stack>
+                <Center>
+                  <Text>{date}</Text>
+                </Center>
+              </HStack>
             </Pressable>
-          </View>
-        ))}
-        {users?.map((user, index) => (
-          <View key={index}>
-            <Pressable onPress={() => navigation.navigate("Chat", { user })}>
-              <Text>{user}</Text>
-            </Pressable>
-          </View>
-        ))}
-      </View>
+          );
+        }}
+      />
+
+      <HeaderModal isOpen={isOpen} setOpen={setOpen} />
     </View>
   );
 };

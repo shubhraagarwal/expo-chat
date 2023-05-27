@@ -9,7 +9,11 @@ const Stack = createStackNavigator();
 export default function UserStack() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
         <Stack.Screen name="ChatList" component={ChatList} />
         <Stack.Screen name="Chat" component={Chat} />
       </Stack.Navigator>
