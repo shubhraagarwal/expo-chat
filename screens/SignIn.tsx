@@ -1,5 +1,5 @@
-import { View, Text, Pressable } from "react-native";
-import React, { useEffect } from "react";
+import { View, Text, Pressable, TextInput } from "react-native";
+import React, { useEffect, useState } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,9 +8,15 @@ import {
 } from "firebase/auth";
 import { auth } from "../hooks/useAuth";
 import { SignInWithEmail } from "../types";
+import { db } from "../firebaseConfig";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 
 const SignIn = () => {
   const provider = new GoogleAuthProvider();
+  const [credentials, setCredentials] = useState<SignInWithEmail>({
+    email: "",
+    password: "",
+  });
 
   const signInWithEmail = ({ email, password }: SignInWithEmail) => {
     signInWithEmailAndPassword(auth, email, password)
@@ -30,12 +36,20 @@ const SignIn = () => {
     return null;
   };
 
-  const signUpUserAndLogin = ({ email, password }: SignInWithEmail) => {
+  const signUpUserAndLogin = async ({ email, password }: SignInWithEmail) => {
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         // Signed in
         const user = userCredential.user;
         console.log(user, "userCreated");
+        try {
+          const docRef = await setDoc(doc(db, "users", email), {
+            email,
+          });
+          console.log("Document written with ID: ", docRef);
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
         // ...
       })
       .catch((error) => {
@@ -68,16 +82,28 @@ const SignIn = () => {
       });
   };
 
-  useEffect(() => {
-    signInWithEmail({
-      email: "def@abc.com",
-      password: "123456",
-    });
-  }, []);
-
   return (
     <View style={{ flex: 1, backgroundColor: "red" }}>
-      <Text style={{ color: "black" }}>Sign sIn</Text>
+      <TextInput
+        value={credentials.email}
+        onChangeText={(e) => setCredentials({ ...credentials, email: e })}
+        style={{ borderWidth: 1, borderColor: "black" }}
+      />
+      <TextInput
+        value={credentials.password}
+        onChangeText={(e) => setCredentials({ ...credentials, password: e })}
+        style={{ borderWidth: 1, borderColor: "black" }}
+      />
+      <Pressable
+        onPress={() =>
+          signInWithEmail({
+            email: credentials.email,
+            password: credentials.password,
+          })
+        }
+      >
+        <Text style={{ color: "black" }}>Sign sIn</Text>
+      </Pressable>
 
       <Pressable onPress={signInWithGoogle}>
         <Text>Google signin</Text>
